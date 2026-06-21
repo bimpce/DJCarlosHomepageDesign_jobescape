@@ -102,6 +102,11 @@
     .btn-play{width:56px;height:56px;border-radius:20px;border:0;color:#0D0D0D;background:linear-gradient(135deg, rgba(139,92,246,1), rgba(236,72,153,1));
       box-shadow:0 0 0 1px rgba(255,255,255,.18) inset,0 18px 60px rgba(139,92,246,.22),0 18px 60px rgba(236,72,153,.18)}
     .progress-wrap{display:flex;flex-direction:column;gap:8px}
+
+    /* Waveform visualization */
+    .wave{height:54px;border-radius:16px;overflow:hidden;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.10)}
+    .wave-canvas{width:100%;height:100%;display:block}
+
     .time-row{display:flex;justify-content:space-between;gap:10px;color:rgba(245,245,245,.66);font-size:12px;letter-spacing:.02em}
     .bar{height:12px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);position:relative;overflow:hidden;cursor:pointer}
     .fill{position:absolute;inset:0 auto 0 0;width:0%;background:linear-gradient(90deg, rgba(139,92,246,1), rgba(236,72,153,1));box-shadow:0 0 24px rgba(139,92,246,.35),0 0 24px rgba(236,72,153,.22)}
@@ -308,6 +313,9 @@
             </div>
 
             <div class="progress-wrap">
+              <div class="wave" aria-hidden="true" title="Live waveform">
+                <canvas id="waveCanvas" class="wave-canvas" width="1200" height="140"></canvas>
+              </div>
               <div class="time-row">
                 <span id="curTime">0:00</span>
                 <span id="durTime">0:00</span>
@@ -656,6 +664,126 @@
         if (audio.currentTime >= audio.duration - 0.15) advanceNext();
       });
 
+      // Waveform visualization (Web Audio API)
+      const waveCanvas = document.getElementById('waveCanvas');
+      const waveCtx = waveCanvas ? waveCanvas.getContext('2d') : null;
+      let audioCtx = null;
+      let analyser = null;
+      let srcNode = null;
+      let freqData = null;
+      let waveRAF = null;
+
+      const resizeWave = () => {
+        if (!waveCanvas) return;
+        // Match device pixel ratio for crisp bars
+        const dpr = Math.max(1, window.devicePixelRatio || 1);
+        const rect = waveCanvas.getBoundingClientRect();
+        const w = Math.max(320, Math.floor(rect.width * dpr));
+        const h = Math.max(80, Math.floor(rect.height * dpr));
+        if (waveCanvas.width !== w) waveCanvas.width = w;
+        if (waveCanvas.height !== h) waveCanvas.height = h;
+      };
+
+      const ensureAudioGraph = async () => {
+        if (!waveCanvas || !waveCtx) return;
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          analyser = audioCtx.createAnalyser();
+          analyser.fftSize = 256;
+          analyser.smoothingTimeConstant = 0.85;
+          freqData = new Uint8Array(analyser.frequencyBinCount);
+          srcNode = audioCtx.createMediaElementSource(audio);
+          srcNode.connect(analyser);
+          analyser.connect(audioCtx.destination);
+          resizeWave();
+          window.addEventListener('resize', resizeWave);
+        }
+        if (audioCtx.state === 'suspended') {
+          try { await audioCtx.resume(); } catch (_) {}
+        }
+      };
+
+      const clearWave = () => {
+        if (!waveCtx || !waveCanvas) return;
+        waveCtx.clearRect(0, 0, waveCanvas.width, waveCanvas.height);
+      };
+
+      const drawWave = () => {
+        if (!waveCtx || !waveCanvas || !analyser || !freqData) return;
+
+        analyser.getByteFrequencyData(freqData);
+
+        const w = waveCanvas.width;
+        const h = waveCanvas.height;
+        waveCtx.clearRect(0, 0, w, h);
+
+        // Background subtle glow
+        waveCtx.fillStyle = 'rgba(255,255,255,0.02)';
+        waveCtx.fillRect(0, 0, w, h);
+
+        const grad = waveCtx.createLinearGradient(0, 0, w, 0);
+        grad.addColorStop(0, 'rgba(139,92,246,0.95)');
+        grad.addColorStop(1, 'rgba(236,72,153,0.90)');
+
+        const bins = freqData.length;
+        const bars = 56; // fixed bar count for clean UI
+        const step = Math.max(1, Math.floor(bins / bars));
+        const gap = Math.max(2, Math.floor(w / (bars * 14)));
+        const barW = Math.max(4, Math.floor((w - gap * (bars - 1)) / bars));
+
+        // Soft shadow
+        waveCtx.shadowColor = 'rgba(139,92,246,0.20)';
+        waveCtx.shadowBlur = Math.max(8, Math.floor(w / 120));
+
+        waveCtx.fillStyle = grad;
+
+        for (let i = 0; i < bars; i++) {
+          const v = freqData[i * step] / 255; // 0..1
+          const eased = Math.pow(v, 0.85);
+          const barH = Math.max(4, eased * (h * 0.92));
+          const x = i * (barW + gap);
+          const y = h - barH;
+          const r = Math.min(10, Math.floor(barW / 2));
+
+          // Rounded rect
+          waveCtx.beginPath();
+          waveCtx.moveTo(x + r, y);
+          waveCtx.lineTo(x + barW - r, y);
+          waveCtx.quadraticCurveTo(x + barW, y, x + barW, y + r);
+          waveCtx.lineTo(x + barW, y + barH - r);
+          waveCtx.quadraticCurveTo(x + barW, y + barH, x + barW - r, y + barH);
+          waveCtx.lineTo(x + r, y + barH);
+          waveCtx.quadraticCurveTo(x, y + barH, x, y + barH - r);
+          waveCtx.lineTo(x, y + r);
+          waveCtx.quadraticCurveTo(x, y, x + r, y);
+          waveCtx.closePath();
+          waveCtx.fill();
+        }
+
+        // Continue while playing
+        waveRAF = requestAnimationFrame(drawWave);
+      };
+
+      const startWave = async () => {
+        await ensureAudioGraph();
+        if (!waveCtx) return;
+        if (waveRAF) cancelAnimationFrame(waveRAF);
+        drawWave();
+      };
+
+      const stopWave = () => {
+        if (waveRAF) cancelAnimationFrame(waveRAF);
+        waveRAF = null;
+      };
+
+      // Start/resume context on user gestures
+      playBtn.addEventListener('click', () => { startWave(); }, { passive:true });
+      document.addEventListener('click', () => { ensureAudioGraph(); }, { once:true, passive:true });
+
+      audio.addEventListener('play', () => { startWave(); });
+      audio.addEventListener('pause', () => { stopWave(); });
+      audio.addEventListener('ended', () => { stopWave(); });
+
       // Sticky mini-player wiring
       const stickyPlayer = document.getElementById('stickyPlayer');
       const stickyToggle = document.getElementById('stickyToggle');
@@ -707,6 +835,7 @@
       if (stickyPlay) {
         stickyPlay.addEventListener('click', (e) => {
           e.stopPropagation();
+          startWave();
           togglePlay();
         });
       }
