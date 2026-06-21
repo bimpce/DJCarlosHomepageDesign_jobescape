@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DJ Carlos — Official</title>
+  <style>
+    :root{--bg:#0D0D0D;--purple:#8B5CF6;--pink:#EC4899;--text:#F5F5F5;--muted:rgba(245,245,245,.72)}
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--text);overflow-x:hidden}
+    .aura{position:fixed;inset:-30vh -30vw;z-index:-2;filter:blur(28px) saturate(120%);
+      background:radial-gradient(900px 700px at 15% 20%, rgba(139,92,246,.55), transparent 58%),
+                 radial-gradient(820px 620px at 85% 25%, rgba(236,72,153,.45), transparent 58%),
+                 radial-gradient(980px 740px at 55% 85%, rgba(139,92,246,.30), transparent 62%);
+      animation:drift 16s ease-in-out infinite alternate}
+    @keyframes drift{0%{transform:translate3d(-2%,-1%,0) scale(1.02)}100%{transform:translate3d(1%,2%,0) scale(1.04)}}
+    .wrap{width:min(1120px,92vw);margin:0 auto}
+    header{position:sticky;top:0;z-index:10;background:rgba(13,13,13,.65);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08)}
+    .nav{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;font-size:12px;color:rgba(245,245,245,.86)}
+    .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--purple),var(--pink));box-shadow:0 0 0 1px rgba(255,255,255,.12)}
+    nav a{color:rgba(245,245,245,.78);text-decoration:none;font-weight:700;font-size:14px;padding:10px 12px;border-radius:12px}
+    nav a[aria-current="page"]{color:#fff;background:linear-gradient(135deg, rgba(139,92,246,.18), rgba(236,72,153,.12));box-shadow:0 0 0 1px rgba(255,255,255,.10) inset}
+
+    .btn{display:inline-flex;align-items:center;justify-content:center;border:0;cursor:pointer;text-decoration:none;white-space:nowrap;
+      padding:12px 16px;border-radius:14px;font-weight:900;color:#0D0D0D;background:linear-gradient(135deg,var(--purple),var(--pink));
+      box-shadow:0 0 0 1px rgba(255,255,255,.16) inset, 0 18px 60px rgba(139,92,246,.16), 0 18px 60px rgba(236,72,153,.12)}
+
+    main{padding:44px 0 60px}
+    section{scroll-margin-top:90px;margin-top:28px}
+
+    .card{border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);padding:18px;position:relative;overflow:hidden}
+    .card::before{content:"";position:absolute;inset:-2px;z-index:0;filter:blur(14px);opacity:.95;
+      background:radial-gradient(700px 320px at 18% 20%, rgba(139,92,246,.18), transparent 58%),
+                 radial-gradient(620px 280px at 85% 30%, rgba(236,72,153,.14), transparent 58%);
+      animation:heroGlow 15s ease-in-out infinite alternate}
+    @keyframes heroGlow{0%{transform:translate3d(-1%,-1%,0) scale(1)}100%{transform:translate3d(1%,1%,0) scale(1.03)}}
+    .card > *{position:relative;z-index:1}
+
+    .title{font-size:clamp(44px,6vw,84px);letter-spacing:.04em;text-transform:uppercase;margin:10px 0}
+    .neon{color:#fff;text-shadow:
+      0 0 2px rgba(255,255,255,.85), 0 0 8px rgba(255,255,255,.55),
+      0 0 12px rgba(139,92,246,.95), 0 0 24px rgba(139,92,246,.80), 0 0 40px rgba(139,92,246,.55), 0 0 70px rgba(139,92,246,.35),
+      0 0 14px rgba(236,72,153,.90), 0 0 28px rgba(236,72,153,.75), 0 0 48px rgba(236,72,153,.50), 0 0 90px rgba(236,72,153,.30),
+      0 0 140px rgba(236,72,153,.18), 0 0 160px rgba(139,92,246,.16);
+      filter:saturate(140%) contrast(115%)}
+    .muted{color:var(--muted);line-height:1.6}
+
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:22px;align-items:stretch}
+    .kicker{display:inline-flex;align-items:center;gap:10px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);
+      color:rgba(245,245,245,.80);font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;width:fit-content}
+    .dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));box-shadow:0 0 14px rgba(139,92,246,.55),0 0 18px rgba(236,72,153,.40)}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:14px}
+    .mini{font-size:13px;color:rgba(245,245,245,.72)}
+
+    .section{margin-top:22px}
+    .section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:10px}
+    .section h2{margin:0;font-size:18px;letter-spacing:.08em;text-transform:uppercase;color:rgba(245,245,245,.92)}
+    .hint{margin:0;color:rgba(245,245,245,.62);font-size:13px;line-height:1.45}
+
+    .scroller{display:flex;gap:14px;overflow-x:auto;padding:10px 4px 14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+    .scroller::-webkit-scrollbar{height:10px}
+    .scroller::-webkit-scrollbar-track{background:rgba(255,255,255,.05);border-radius:999px}
+    .scroller::-webkit-scrollbar-thumb{background:linear-gradient(135deg, rgba(139,92,246,.7), rgba(236,72,153,.6));border-radius:999px}
+
+    .gig{flex:0 0 auto;width:min(340px,78vw);scroll-snap-align:start;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.10);box-shadow:0 16px 50px rgba(0,0,0,.45);padding:16px;position:relative;overflow:hidden}
+    .gig::before{content:"";position:absolute;inset:-2px;background:radial-gradient(420px 180px at 20% 30%, rgba(139,92,246,.18), transparent 55%),
+      radial-gradient(420px 180px at 80% 10%, rgba(236,72,153,.14), transparent 55%);opacity:.85;filter:blur(10px)}
+    .gig > *{position:relative}
+    .gig-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .pill{display:inline-flex;align-items:center;justify-content:center;padding:8px 10px;border-radius:999px;font-weight:900;font-size:12px;letter-spacing:.06em;
+      color:rgba(255,255,255,.92);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10);text-transform:uppercase;white-space:nowrap}
+    .date{font-weight:900;font-size:18px;letter-spacing:.02em}
+    .venue{margin-top:8px;font-weight:900;font-size:16px}
+    .meta{margin-top:4px;color:rgba(245,245,245,.66);font-size:13px;line-height:1.45}
+
+    .stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;height:100%}
+    .stat{border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);padding:16px;position:relative;overflow:hidden}
+    .stat::before{content:"";position:absolute;inset:-2px;background:linear-gradient(135deg, rgba(139,92,246,.22), rgba(236,72,153,.16));opacity:0;transition:opacity .25s ease}
+    .stat:hover::before{opacity:1}
+    .stat > *{position:relative}
+    .stat .label{color:rgba(245,245,245,.72);font-weight:900;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+    .stat .value{margin-top:6px;font-weight:900;font-size:18px}
+    .stat .sub{margin-top:2px;color:rgba(245,245,245,.62);font-size:13px;line-height:1.35}
+
+    /* Mixes premium player */
+    .mix-layout{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;align-items:start}
+    .player{display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:22px;background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.12);box-shadow:0 0 0 1px rgba(255,255,255,.06) inset,0 30px 80px rgba(0,0,0,.55),0 18px 70px rgba(139,92,246,.10),0 18px 70px rgba(236,72,153,.08)}
+    .now{display:flex;align-items:center;gap:14px;min-height:72px}
+    .art{width:64px;height:64px;border-radius:16px;background:radial-gradient(18px 18px at 35% 30%, rgba(255,255,255,.35), transparent 55%),linear-gradient(135deg, rgba(139,92,246,.85), rgba(236,72,153,.80));
+      box-shadow:0 0 0 1px rgba(255,255,255,.14),0 14px 46px rgba(139,92,246,.22),0 14px 46px rgba(236,72,153,.16);flex:0 0 auto}
+    .now-meta{min-width:0}
+    .track-title{margin:0;font-weight:900;letter-spacing:.01em;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .track-sub{margin:4px 0 0;color:rgba(245,245,245,.66);font-size:13px}
+    .controls{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .btn-icon{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:16px;cursor:pointer;border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);color:rgba(255,255,255,.92);transition:transform .15s ease,background .15s ease,border-color .15s ease;user-select:none}
+    .btn-icon:hover{transform:translateY(-1px);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16)}
+    .btn-icon:active{transform:translateY(0) scale(.99)}
+    .btn-play{width:56px;height:56px;border-radius:20px;border:0;color:#0D0D0D;background:linear-gradient(135deg, rgba(139,92,246,1), rgba(236,72,153,1));
+      box-shadow:0 0 0 1px rgba(255,255,255,.18) inset,0 18px 60px rgba(139,92,246,.22),0 18px 60px rgba(236,72,153,.18)}
+    .progress-wrap{display:flex;flex-direction:column;gap:8px}
+    .time-row{display:flex;justify-content:space-between;gap:10px;color:rgba(245,245,245,.66);font-size:12px;letter-spacing:.02em}
+    .bar{height:12px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);position:relative;overflow:hidden;cursor:pointer}
+    .fill{position:absolute;inset:0 auto 0 0;width:0%;background:linear-gradient(90deg, rgba(139,92,246,1), rgba(236,72,153,1));box-shadow:0 0 24px rgba(139,92,246,.35),0 0 24px rgba(236,72,153,.22)}
+    .knob{position:absolute;top:50%;left:0%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:999px;background:rgba(255,255,255,.92);
+      box-shadow:0 0 0 1px rgba(0,0,0,.25),0 0 22px rgba(139,92,246,.40),0 0 22px rgba(236,72,153,.28);pointer-events:none}
+    .vol{display:flex;align-items:center;gap:10px;min-width:210px;flex:1;justify-content:flex-end}
+    .vol label{color:rgba(245,245,245,.62);font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+    input[type="range"]{-webkit-appearance:none;appearance:none;width:160px;height:10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);outline:none}
+    input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:999px;background:linear-gradient(135deg, rgba(139,92,246,1), rgba(236,72,153,1));
+      box-shadow:0 0 0 1px rgba(255,255,255,.18) inset,0 0 26px rgba(139,92,246,.30),0 0 26px rgba(236,72,153,.22);cursor:pointer}
+    .playlist{display:flex;flex-direction:column;gap:10px}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);cursor:pointer;
+      transition:background .15s ease,border-color .15s ease,transform .15s ease}
+    .row:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.14);transform:translateY(-1px)}
+    .row.active{background:linear-gradient(135deg, rgba(139,92,246,.16), rgba(236,72,153,.12));border-color:rgba(255,255,255,.18);box-shadow:0 0 0 1px rgba(255,255,255,.07) inset}
+    .row .left{min-width:0}
+    .row .name{margin:0;font-weight:900;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .row .sub{margin:4px 0 0;color:rgba(245,245,245,.62);font-size:12px}
+    .badge{padding:8px 10px;border-radius:999px;font-weight:900;font-size:12px;letter-spacing:.06em;text-transform:uppercase;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10);color:rgba(245,245,245,.88);white-space:nowrap}
+
+    /* Booking form */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .field{display:flex;flex-direction:column;gap:8px}
+    .field.full{grid-column:1 / -1}
+    .field label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(245,245,245,.72);font-weight:900}
+    .field input,.field select,.field textarea{padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:rgba(255,255,255,.92);outline:none;font:inherit}
+    .field textarea{resize:vertical;min-height:110px}
+    .field select{appearance:none;background-image:linear-gradient(45deg, transparent 50%, rgba(245,245,245,.75) 50%),linear-gradient(135deg, rgba(245,245,245,.75) 50%, transparent 50%),linear-gradient(to right, transparent, transparent);
+      background-position:calc(100% - 18px) calc(50% - 4px),calc(100% - 12px) calc(50% - 4px),0 0;background-size:6px 6px,6px 6px,100% 100%;background-repeat:no-repeat;padding-right:40px}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(236,72,153,.55);box-shadow:0 0 0 4px rgba(236,72,153,.12),0 0 0 1px rgba(139,92,246,.18) inset}
+    .field.invalid input,.field.invalid select,.field.invalid textarea{border-color:rgba(236,72,153,.70);box-shadow:0 0 0 4px rgba(236,72,153,.14),0 0 0 1px rgba(236,72,153,.25) inset,0 0 28px rgba(236,72,153,.14)}
+    .field .error{display:none;margin-top:-2px;color:rgba(255,120,170,.92);font-size:12px;font-weight:900;letter-spacing:.01em}
+    .field.invalid .error{display:block}
+    .actions{grid-column:1 / -1;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:2px}
+    .helper{color:rgba(245,245,245,.62);font-size:13px;line-height:1.5}
+    .status{grid-column:1 / -1;margin-top:10px;padding:12px;border-radius:16px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);display:none}
+    .status.ok{display:block;border-color:rgba(139,92,246,.28);box-shadow:0 0 24px rgba(139,92,246,.18)}
+    .status.err{display:block;border-color:rgba(236,72,153,.30);box-shadow:0 0 24px rgba(236,72,153,.18)}
+
+    /* Sticky mini-player */
+    body.has-sticky{padding-bottom:88px}
+    .sticky-player{position:fixed;left:0;right:0;bottom:0;z-index:50;padding:12px 12px 14px;background:linear-gradient(to top, rgba(13,13,13,.95), rgba(13,13,13,.65));
+      border-top:1px solid rgba(255,255,255,.10);backdrop-filter:blur(14px)}
+    .sticky-inner{width:min(1120px, 92vw);margin:0 auto;display:flex;align-items:center;gap:12px;padding:12px;border-radius:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 0 0 1px rgba(255,255,255,.06) inset, 0 18px 70px rgba(139,92,246,.10), 0 18px 70px rgba(236,72,153,.08);
+      cursor:pointer;user-select:none}
+    .sticky-play{flex:0 0 auto;width:44px;height:44px;border-radius:16px;border:0;cursor:pointer;color:#0D0D0D;
+      background:linear-gradient(135deg,var(--purple),var(--pink));box-shadow:0 0 0 1px rgba(255,255,255,.18) inset}
+    .sticky-meta{min-width:0;flex:1;display:flex;flex-direction:column;gap:8px}
+    .sticky-title{font-weight:900;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .sticky-bar{height:10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);position:relative;overflow:hidden}
+    .sticky-fill{position:absolute;inset:0 auto 0 0;width:0%;background:linear-gradient(90deg, rgba(139,92,246,1), rgba(236,72,153,1));
+      box-shadow:0 0 18px rgba(139,92,246,.25),0 0 18px rgba(236,72,153,.18)}
+
+    /* Expanded state: show full player section */
+    .mixes-expanded #mixes{outline:1px solid rgba(255,255,255,.10);border-radius:18px}
+
+    @media (max-width:920px){.hero{grid-template-columns:1fr}.stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.mix-layout{grid-template-columns:1fr}.vol{justify-content:flex-start}input[type="range"]{width:min(260px,58vw)}}
+    @media (max-width:820px){.form-grid{grid-template-columns:1fr}}
+    @media (max-width:640px){nav{display:none}.stat-grid{grid-template-columns:1fr}.vol{width:100%}}
+    @media (prefers-reduced-motion: reduce){.aura{animation:none}.card::before{animation:none}}
+  </style>
+</head>
+<body>
+  <div class="aura" aria-hidden="true"></div>
+  <header>
+    <div class="wrap">
+      <div class="nav">
+        <div class="brand"><div class="logo" aria-hidden="true"></div>DJ Carlos</div>
+        <nav aria-label="Primary">
+          <a href="#home" data-nav="home" aria-current="page">Home</a>
+          <a href="#mixes" data-nav="mixes">Mixes</a>
+          <a href="#book" data-nav="book">Book</a>
+        </nav>
+        <a class="btn" href="#book">Book Now</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="home" aria-label="Home">
+      <div class="hero">
+        <div class="card">
+          <div class="kicker"><span class="dot" aria-hidden="true"></span> Live DJ • Clubs • Festivals • Private Events</div>
+          <h1 class="title neon">DJ CARLOS</h1>
+          <p class="tagline muted">Bringing the Beat to Mexico City &amp; Beyond.</p>
+          <div class="hero-actions">
+            <a class="btn" href="#book">Book Now</a>
+            <a class="btn" href="#gigs" style="background:transparent;color:rgba(245,245,245,.92);box-shadow:0 0 0 1px rgba(255,255,255,.14) inset">See Upcoming Gigs</a>
+            <span class="mini">Fast response • Pro sound • Custom sets</span>
+          </div>
+
+          <div id="gigs" class="section" aria-label="Upcoming gigs">
+            <div class="section-head">
+              <h2>Upcoming Gigs</h2>
+              <p class="hint">Swipe / scroll horizontally to explore dates.</p>
+            </div>
+
+            <div class="scroller" role="region" aria-label="Upcoming gigs scroller" tabindex="0">
+              <article class="gig">
+                <div class="gig-top">
+                  <div>
+                    <div class="date">Fri • Jul 18</div>
+                    <div class="meta">Doors 10:00 PM • Mexico City</div>
+                  </div>
+                  <div class="pill">Club Night</div>
+                </div>
+                <div class="venue">Neon Terrace</div>
+                <div class="meta">Open-format set with house, reggaeton &amp; Latin tech vibes.</div>
+              </article>
+
+              <article class="gig">
+                <div class="gig-top">
+                  <div>
+                    <div class="date">Sat • Aug 02</div>
+                    <div class="meta">Sunset 6:30 PM • Roma Norte</div>
+                  </div>
+                  <div class="pill">Rooftop</div>
+                </div>
+                <div class="venue">Azotea Lúmina</div>
+                <div class="meta">Deep house to peak-time grooves with live percussion moments.</div>
+              </article>
+
+              <article class="gig">
+                <div class="gig-top">
+                  <div>
+                    <div class="date">Thu • Aug 21</div>
+                    <div class="meta">8:00 PM • Polanco</div>
+                  </div>
+                  <div class="pill">Corporate</div>
+                </div>
+                <div class="venue">Skyline Ballroom</div>
+                <div class="meta">High-energy, clean edits set tailored to brand + crowd.</div>
+              </article>
+
+              <article class="gig">
+                <div class="gig-top">
+                  <div>
+                    <div class="date">Sat • Sep 13</div>
+                    <div class="meta">All night • Condesa</div>
+                  </div>
+                  <div class="pill">Festival</div>
+                </div>
+                <div class="venue">Pulse Mercado</div>
+                <div class="meta">Main-stage set: house, tech house, and melodic peaks.</div>
+              </article>
+
+              <article class="gig">
+                <div class="gig-top">
+                  <div>
+                    <div class="date">Fri • Oct 03</div>
+                    <div class="meta">9:00 PM • Centro</div>
+                  </div>
+                  <div class="pill">Private</div>
+                </div>
+                <div class="venue">Secret Loft</div>
+                <div class="meta">Invite-only celebration set with crowd-request highlights.</div>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <aside class="stat-grid" aria-label="Highlights">
+          <div class="stat">
+            <div class="label">Sound</div>
+            <div class="value">Club-ready</div>
+            <div class="sub">Tight transitions, punchy low-end, clean highs.</div>
+          </div>
+          <div class="stat">
+            <div class="label">Style</div>
+            <div class="value">Open-format</div>
+            <div class="sub">From house to Latin hits—always reading the room.</div>
+          </div>
+          <div class="stat">
+            <div class="label">Based in</div>
+            <div class="value">CDMX</div>
+            <div class="sub">Available for travel bookings across Mexico and beyond.</div>
+          </div>
+          <div class="stat">
+            <div class="label">Bookings</div>
+            <div class="value">Fast</div>
+            <div class="sub">Tap “Book Now” for a quick quote &amp; availability.</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="mixes" aria-label="Mixes">
+      <div class="section-head">
+        <h2>Mixes</h2>
+        <p class="hint">Premium neon player. Click a track, scrub the timeline, and it auto-advances.</p>
+      </div>
+
+      <div class="mix-layout">
+        <div class="card" style="padding:18px">
+          <div class="player" aria-label="Audio player">
+            <div class="now">
+              <div class="art" aria-hidden="true"></div>
+              <div class="now-meta">
+                <p class="track-title" id="trackTitle">Loading…</p>
+                <p class="track-sub" id="trackSub">DJ Carlos • Neon Mix Series</p>
+              </div>
+            </div>
+
+            <div class="progress-wrap">
+              <div class="time-row">
+                <span id="curTime">0:00</span>
+                <span id="durTime">0:00</span>
+              </div>
+              <div class="bar" id="bar" role="slider" aria-label="Progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+                <div class="fill" id="fill"></div>
+                <div class="knob" id="knob"></div>
+              </div>
+            </div>
+
+            <div class="controls">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <button class="btn-icon" id="prevBtn" type="button" aria-label="Previous track">⟵</button>
+                <button class="btn-icon btn-play" id="playBtn" type="button" aria-label="Play">▶</button>
+                <button class="btn-icon" id="nextBtn" type="button" aria-label="Next track">⟶</button>
+              </div>
+
+              <div class="vol">
+                <label for="vol">Volume</label>
+                <input id="vol" type="range" min="0" max="1" step="0.01" value="0.85" aria-label="Volume" />
+              </div>
+            </div>
+
+            <audio id="audio" preload="metadata"></audio>
+            <p class="hint" style="margin:0">Placeholder MP3 sources for now (swap with Pixabay MP3 URLs when ready).</p>
+          </div>
+        </div>
+
+        <aside class="card" style="padding:18px">
+          <div class="section-head" style="margin-bottom:8px">
+            <h2 style="font-size:16px">Playlist</h2>
+            <p class="hint"><span id="trackCount">5</span> tracks</p>
+          </div>
+          <div class="playlist" id="playlist" role="list"></div>
+          <p class="hint" style="margin-top:10px">Tip: click-to-jump + drag scrubbing is enabled on the progress bar.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section id="book" aria-label="Booking">
+      <div class="section-head">
+        <h2>Book</h2>
+        <p class="hint">Submit your event details. You’ll see an on-page confirmation after a successful submit.</p>
+      </div>
+
+      <div class="card" style="padding:18px">
+        <form id="bookingForm" class="form-grid" action="https://formspree.io/f/xdajbkqd" method="POST" novalidate>
+          <div class="field" data-field>
+            <label for="b_name">Name</label>
+            <input id="b_name" name="name" type="text" autocomplete="name" placeholder="Your full name" required />
+            <div class="error">This field is required.</div>
+          </div>
+
+          <div class="field" data-field>
+            <label for="b_email">Email</label>
+            <input id="b_email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required />
+            <div class="error">This field is required.</div>
+          </div>
+
+          <div class="field" data-field>
+            <label for="b_date">Event date</label>
+            <input id="b_date" name="event_date" type="date" required />
+            <div class="error">This field is required.</div>
+          </div>
+
+          <div class="field" data-field>
+            <label for="b_type">Event type</label>
+            <select id="b_type" name="event_type" required>
+              <option value="" selected disabled>Select…</option>
+              <option>Wedding</option>
+              <option>Corporate</option>
+              <option>Club Night</option>
+              <option>Private Party</option>
+            </select>
+            <div class="error">This field is required.</div>
+          </div>
+
+          <div class="field" data-field>
+            <label for="b_venue">Venue name</label>
+            <input id="b_venue" name="venue_name" type="text" placeholder="Venue / location" required />
+            <div class="error">This field is required.</div>
+          </div>
+
+          <div class="field" data-field>
+            <label for="b_budget">Budget range</label>
+            <select id="b_budget" name="budget_range" required>
+              <option value="" selected disabled>Select…</option>
+              <option>Under $500</option>
+              <option>$500–$1,000</option>
+              <option>$1,000–$2,500</option>
+              <option>$2,500+</option>
+            </select>
+            <div class="error">This field is required.</div>
+          </div>
+
+          <div class="field full" data-field>
+            <label for="b_details">Additional details</label>
+            <textarea id="b_details" name="additional_details" placeholder="Set length, music vibe, guest count, equipment on site, schedule, special moments…" required></textarea>
+            <div class="error">This field is required.</div>
+          </div>
+
+          <div class="actions">
+            <button class="btn" id="submitBtn" type="submit">Submit Booking Request</button>
+            <span class="helper">Powered by Formspree. Validation runs before submit.</span>
+          </div>
+
+          <div id="status" class="status" role="status" aria-live="polite"></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Sticky mini-player (shows while browsing; click to expand full player) -->
+    <div class="sticky-player" id="stickyPlayer" aria-label="Sticky player" hidden>
+      <div class="sticky-inner" id="stickyToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="mixes">
+        <button class="sticky-play" id="stickyPlay" type="button" aria-label="Play">▶</button>
+        <div class="sticky-meta">
+          <div class="sticky-title" id="stickyTitle">DJ Carlos — Mixes</div>
+          <div class="sticky-bar" id="stickyBar" role="slider" aria-label="Progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+            <div class="sticky-fill" id="stickyFill"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Smooth scrolling + active nav
+    (function(){
+      const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const navLinks = Array.from(document.querySelectorAll('nav a[data-nav]'));
+      const sections = [document.getElementById('home'), document.getElementById('mixes'), document.getElementById('book')].filter(Boolean);
+
+      document.addEventListener('click', (e) => {
+        const a = e.target.closest('a[href^="#"]');
+        if (!a) return;
+        const id = a.getAttribute('href');
+        const el = id && document.querySelector(id);
+        if (!el) return;
+        e.preventDefault();
+        el.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
+        history.pushState(null, '', id);
+      });
+
+      const setActive = (key) => {
+        navLinks.forEach(a => {
+          if (a.getAttribute('data-nav') === key) a.setAttribute('aria-current','page');
+          else a.removeAttribute('aria-current');
+        });
+      };
+
+      const obs = new IntersectionObserver((entries) => {
+        const v = entries.filter(e => e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio);
+        if (!v.length) return;
+        setActive(v[0].target.id);
+      }, { threshold: [0.45, 0.6] });
+
+      sections.forEach(s => obs.observe(s));
+    })();
+
+    // Mixes: premium player (skip, scrub, auto-advance)
+    (function(){
+      const tracks = [
+        // TEMP placeholders (working MP3s). Swap with Pixabay MP3 URLs later.
+        { title: 'Neon Nights (Club Teaser)', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', tag: 'Club' },
+        { title: 'CDMX Rooftop Sunset (Warm Up)', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', tag: 'Rooftop' },
+        { title: 'Pulse Mercado (Festival Cut)', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', tag: 'Festival' },
+        { title: 'Afterhours Glow (Deep Session)', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', tag: 'Deep' },
+        { title: 'Latin Tech Peak-Time (Main Set)', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', tag: 'Peak' },
+      ];
+
+      const audio = document.getElementById('audio');
+      const playBtn = document.getElementById('playBtn');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const vol = document.getElementById('vol');
+      const trackTitle = document.getElementById('trackTitle');
+      const curTime = document.getElementById('curTime');
+      const durTime = document.getElementById('durTime');
+      const bar = document.getElementById('bar');
+      const fill = document.getElementById('fill');
+      const knob = document.getElementById('knob');
+      const playlistEl = document.getElementById('playlist');
+      const trackCount = document.getElementById('trackCount');
+      if (!audio || !playBtn || !prevBtn || !nextBtn || !vol || !trackTitle || !curTime || !durTime || !bar || !fill || !knob || !playlistEl || !trackCount) return;
+
+      let idx = 0;
+      let isScrubbing = false;
+
+      const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+      const fmt = (t) => {
+        if (!isFinite(t) || t < 0) return '0:00';
+        const m = Math.floor(t / 60);
+        const s = Math.floor(t % 60);
+        return `${m}:${String(s).padStart(2,'0')}`;
+      };
+
+      const setPlayIcon = (playing) => {
+        playBtn.textContent = playing ? '❚❚' : '▶';
+        playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+      };
+
+      const setProgress = (pct) => {
+        const p = clamp(pct, 0, 1);
+        fill.style.width = (p * 100).toFixed(3) + '%';
+        knob.style.left = (p * 100).toFixed(3) + '%';
+        bar.setAttribute('aria-valuenow', String(Math.round(p * 100)));
+      };
+
+      const highlightPlaylist = () => {
+        playlistEl.querySelectorAll('[data-i]').forEach(r => {
+          const active = Number(r.getAttribute('data-i')) === idx;
+          r.classList.toggle('active', active);
+        });
+      };
+
+      const selectTrack = (newIdx, autoplay) => {
+        idx = (newIdx + tracks.length) % tracks.length;
+        const t = tracks[idx];
+
+        // Force the new source to commit reliably.
+        audio.pause();
+        trackTitle.textContent = t.title;
+        audio.setAttribute('src', t.url);
+        audio.load();
+        audio.currentTime = 0;
+
+        highlightPlaylist();
+        setProgress(0);
+        curTime.textContent = '0:00';
+        durTime.textContent = '0:00';
+
+        if (autoplay) audio.play().catch(() => {});
+      };
+
+      const togglePlay = () => {
+        if (audio.paused) audio.play().catch(() => {});
+        else audio.pause();
+      };
+
+      const seekToClientX = (clientX) => {
+        const rect = bar.getBoundingClientRect();
+        const pct = clamp((clientX - rect.left) / rect.width, 0, 1);
+        if (isFinite(audio.duration) && audio.duration > 0) audio.currentTime = pct * audio.duration;
+        setProgress(pct);
+      };
+
+      const bindScrub = () => {
+        const start = (clientX) => { isScrubbing = true; seekToClientX(clientX); };
+        const move = (clientX) => { if (!isScrubbing) return; seekToClientX(clientX); };
+        const end = () => { isScrubbing = false; };
+
+        // Click-to-seek
+        bar.addEventListener('click', (e) => seekToClientX(e.clientX));
+
+        // Drag scrubbing (mouse)
+        bar.addEventListener('mousedown', (e) => { e.preventDefault(); start(e.clientX); });
+        window.addEventListener('mousemove', (e) => move(e.clientX));
+        window.addEventListener('mouseup', end);
+
+        // Touch scrubbing + tap-to-seek
+        bar.addEventListener('touchstart', (e) => {
+          if (!e.touches || !e.touches[0]) return;
+          start(e.touches[0].clientX);
+        }, { passive:true });
+        bar.addEventListener('touchend', (e) => {
+          if (e.changedTouches && e.changedTouches[0]) seekToClientX(e.changedTouches[0].clientX);
+          end();
+        }, { passive:true });
+        window.addEventListener('touchmove', (e) => {
+          if (!e.touches || !e.touches[0]) return;
+          move(e.touches[0].clientX);
+        }, { passive:true });
+        window.addEventListener('touchend', end);
+
+        // Keyboard on bar
+        bar.addEventListener('keydown', (e) => {
+          if (!isFinite(audio.duration) || audio.duration <= 0) return;
+          const step = 5;
+          if (e.key === 'ArrowLeft') audio.currentTime = clamp(audio.currentTime - step, 0, audio.duration);
+          if (e.key === 'ArrowRight') audio.currentTime = clamp(audio.currentTime + step, 0, audio.duration);
+        });
+      };
+
+      const renderPlaylist = () => {
+        playlistEl.innerHTML = '';
+        trackCount.textContent = String(tracks.length);
+        tracks.forEach((t, i) => {
+          const row = document.createElement('div');
+          row.className = 'row';
+          row.setAttribute('role','listitem');
+          row.setAttribute('data-i', String(i));
+          row.innerHTML = `
+            <div class="left">
+              <p class="name">${t.title}</p>
+              <p class="sub">Tap to play</p>
+            </div>
+            <div class="badge">${t.tag}</div>
+          `;
+          row.addEventListener('click', () => {
+            const same = idx === i;
+            selectTrack(i, true);
+            if (same) togglePlay();
+          });
+          playlistEl.appendChild(row);
+        });
+      };
+
+      // Wire controls
+      playBtn.addEventListener('click', togglePlay);
+      prevBtn.addEventListener('click', () => selectTrack(idx - 1, true));
+      nextBtn.addEventListener('click', () => selectTrack(idx + 1, true));
+      vol.addEventListener('input', () => { audio.volume = Number(vol.value); });
+
+      audio.addEventListener('play', () => setPlayIcon(true));
+      audio.addEventListener('pause', () => setPlayIcon(false));
+      audio.addEventListener('loadedmetadata', () => { durTime.textContent = fmt(audio.duration); });
+      audio.addEventListener('timeupdate', () => {
+        if (isScrubbing) return;
+        curTime.textContent = fmt(audio.currentTime);
+        if (isFinite(audio.duration) && audio.duration > 0) setProgress(audio.currentTime / audio.duration);
+      });
+
+      // Auto-advance (loop back after last)
+      let advancing = false;
+      const advanceNext = () => {
+        if (advancing) return;
+        advancing = true;
+        const nextIndex = idx + 1;
+        selectTrack(nextIndex, false);
+        setTimeout(() => {
+          audio.play().catch(() => setPlayIcon(false)).finally(() => {
+            // Small delay prevents double-advance if multiple end signals fire.
+            setTimeout(() => { advancing = false; }, 250);
+          });
+        }, 0);
+      };
+
+      // Primary end signal
+      audio.addEventListener('ended', advanceNext);
+
+      // Fallback: some sandboxed/streamed sources can miss 'ended'
+      audio.addEventListener('timeupdate', () => {
+        if (advancing) return;
+        if (!isFinite(audio.duration) || audio.duration <= 0) return;
+        if (audio.paused) return;
+        if (audio.currentTime >= audio.duration - 0.15) advanceNext();
+      });
+
+      // Sticky mini-player wiring
+      const stickyPlayer = document.getElementById('stickyPlayer');
+      const stickyToggle = document.getElementById('stickyToggle');
+      const stickyPlay = document.getElementById('stickyPlay');
+      const stickyTitle = document.getElementById('stickyTitle');
+      const stickyBar = document.getElementById('stickyBar');
+      const stickyFill = document.getElementById('stickyFill');
+      const mixesSection = document.getElementById('mixes');
+
+      const setStickyProgress = (pct) => {
+        const p = clamp(pct, 0, 1);
+        if (stickyFill) stickyFill.style.width = (p * 100).toFixed(3) + '%';
+        if (stickyBar) stickyBar.setAttribute('aria-valuenow', String(Math.round(p * 100)));
+      };
+
+      const updateStickyTitle = () => {
+        if (stickyTitle) stickyTitle.textContent = trackTitle.textContent || 'DJ Carlos — Mixes';
+      };
+
+      const setStickyPlayIcon = (playing) => {
+        if (!stickyPlay) return;
+        stickyPlay.textContent = playing ? '❚❚' : '▶';
+        stickyPlay.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+      };
+
+      const showSticky = () => {
+        if (!stickyPlayer) return;
+        stickyPlayer.hidden = false;
+        document.body.classList.add('has-sticky');
+      };
+
+      const toggleExpand = () => {
+        const expanded = document.body.classList.toggle('mixes-expanded');
+        if (stickyToggle) stickyToggle.setAttribute('aria-expanded', String(expanded));
+        if (expanded && mixesSection) {
+          mixesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      };
+
+      const seekStickyToClientX = (clientX) => {
+        if (!stickyBar) return;
+        const rect = stickyBar.getBoundingClientRect();
+        const pct = clamp((clientX - rect.left) / rect.width, 0, 1);
+        if (isFinite(audio.duration) && audio.duration > 0) audio.currentTime = pct * audio.duration;
+        setStickyProgress(pct);
+        setProgress(pct);
+      };
+
+      if (stickyPlay) {
+        stickyPlay.addEventListener('click', (e) => {
+          e.stopPropagation();
+          togglePlay();
+        });
+      }
+
+      if (stickyToggle) {
+        stickyToggle.addEventListener('click', toggleExpand);
+        stickyToggle.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleExpand();
+          }
+        });
+      }
+
+      if (stickyBar) {
+        stickyBar.addEventListener('click', (e) => {
+          e.stopPropagation();
+          seekStickyToClientX(e.clientX);
+        });
+        stickyBar.addEventListener('keydown', (e) => {
+          if (!isFinite(audio.duration) || audio.duration <= 0) return;
+          const step = 5;
+          if (e.key === 'ArrowLeft') audio.currentTime = clamp(audio.currentTime - step, 0, audio.duration);
+          if (e.key === 'ArrowRight') audio.currentTime = clamp(audio.currentTime + step, 0, audio.duration);
+        });
+      }
+
+      // Keep sticky UI in sync with main player
+      audio.addEventListener('loadedmetadata', () => {
+        showSticky();
+        updateStickyTitle();
+      });
+      audio.addEventListener('play', () => { setStickyPlayIcon(true); updateStickyTitle(); });
+      audio.addEventListener('pause', () => { setStickyPlayIcon(false); updateStickyTitle(); });
+      audio.addEventListener('timeupdate', () => {
+        if (isFinite(audio.duration) && audio.duration > 0) setStickyProgress(audio.currentTime / audio.duration);
+      });
+
+      // Init
+      audio.volume = Number(vol.value);
+      renderPlaylist();
+      bindScrub();
+      selectTrack(0, false);
+      setPlayIcon(false);
+      setStickyPlayIcon(false);
+      updateStickyTitle();
+      showSticky();
+    })();
+
+    // Booking: Formspree submit + inline validation + confirmation
+    (function(){
+      const form = document.getElementById('bookingForm');
+      const status = document.getElementById('status');
+      const submitBtn = document.getElementById('submitBtn');
+      if (!form || !status || !submitBtn) return;
+
+      const fields = {
+        name: document.getElementById('b_name'),
+        email: document.getElementById('b_email'),
+        date: document.getElementById('b_date'),
+        type: document.getElementById('b_type'),
+        venue: document.getElementById('b_venue'),
+        budget: document.getElementById('b_budget'),
+        details: document.getElementById('b_details')
+      };
+
+      // Restrict date picker to today or future dates.
+      const todayLocalISO = () => {
+        const d = new Date();
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+      };
+      const minDate = todayLocalISO();
+      if (fields.date) fields.date.min = minDate;
+
+      const isPastDate = (yyyyMmDd) => {
+        const s = String(yyyyMmDd || '').trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+        return s < minDate;
+      };
+
+      const setStatus = (type, msg) => {
+        status.className = 'status ' + (type || '');
+        status.textContent = msg || '';
+        // Explicitly toggle visibility so users always see feedback.
+        status.style.display = msg ? 'block' : 'none';
+      };
+
+      const getWrap = (el) => el ? el.closest('.field') : null;
+      const setFieldError = (el, msg) => {
+        const wrap = getWrap(el);
+        if (!wrap) return;
+        const err = wrap.querySelector('.error');
+        if (err) err.textContent = msg;
+        wrap.classList.add('invalid');
+      };
+      const clearFieldError = (el) => {
+        const wrap = getWrap(el);
+        if (!wrap) return;
+        wrap.classList.remove('invalid');
+      };
+
+      const isBlank = (v) => String(v || '').trim().length === 0;
+      const looksLikeEmail = (v) => {
+        const s = String(v || '').trim();
+        if (!s.includes('@')) return false;
+        const parts = s.split('@');
+        if (parts.length !== 2) return false;
+        const [local, domain] = parts;
+        if (isBlank(local) || isBlank(domain)) return false;
+        if (!domain.includes('.')) return false;
+        if (domain.startsWith('.') || domain.endsWith('.')) return false;
+        return true;
+      };
+
+      const validateAll = () => {
+        Object.values(fields).forEach(clearFieldError);
+        setStatus('', '');
+
+        let ok = true;
+        if (isBlank(fields.name.value)) { setFieldError(fields.name, 'This field is required.'); ok = false; }
+        if (isBlank(fields.email.value)) { setFieldError(fields.email, 'This field is required.'); ok = false; }
+        if (isBlank(fields.date.value)) { setFieldError(fields.date, 'This field is required.'); ok = false; }
+        else if (isPastDate(fields.date.value)) { setFieldError(fields.date, 'Please choose today or a future date.'); ok = false; }
+        if (isBlank(fields.type.value)) { setFieldError(fields.type, 'This field is required.'); ok = false; }
+        if (isBlank(fields.venue.value)) { setFieldError(fields.venue, 'This field is required.'); ok = false; }
+        if (isBlank(fields.budget.value)) { setFieldError(fields.budget, 'This field is required.'); ok = false; }
+        if (isBlank(fields.details.value)) { setFieldError(fields.details, 'This field is required.'); ok = false; }
+
+        if (!isBlank(fields.email.value) && !looksLikeEmail(fields.email.value)) {
+          setFieldError(fields.email, 'Please enter a valid email address.');
+          ok = false;
+        }
+
+        return ok;
+      };
+
+      const attachLive = (el, validator) => {
+        if (!el) return;
+        const handler = () => {
+          const wrap = getWrap(el);
+          if (!wrap) return;
+          const v = validator ? validator(el.value) : !isBlank(el.value);
+          if (v) wrap.classList.remove('invalid');
+        };
+        el.addEventListener('input', handler);
+        el.addEventListener('change', handler);
+        el.addEventListener('blur', handler);
+      };
+
+      attachLive(fields.name);
+      attachLive(fields.date);
+      attachLive(fields.type);
+      attachLive(fields.venue);
+      attachLive(fields.budget);
+      attachLive(fields.details);
+      attachLive(fields.email, (v) => !isBlank(v) && looksLikeEmail(v));
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        try{
+          if (!validateAll()) {
+            setStatus('err', 'Please fix the highlighted fields and try again.');
+            const firstInvalid = form.querySelector('.field.invalid input, .field.invalid select, .field.invalid textarea');
+            if (firstInvalid) firstInvalid.focus();
+            return;
+          }
+
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Sending…';
+          setStatus('', '');
+
+          const data = new FormData(form);
+          const res = await fetch(form.action, {
+            method: 'POST',
+            body: data,
+            headers: { 'Accept': 'application/json' }
+          });
+
+          if (res.ok){
+            form.reset();
+            Object.values(fields).forEach(clearFieldError);
+            setStatus('ok', 'Thanks — your booking request was sent. DJ Carlos will get back to you soon with availability and a quote.');
+          } else {
+            let msg = 'Sorry — something went wrong submitting the form. Please try again.';
+            try{
+              const json = await res.json();
+              if (json && json.errors && json.errors.length){
+                msg = json.errors.map(er => er.message).join(' ');
+              }
+            } catch (_) {}
+            setStatus('err', msg);
+          }
+        } catch (err){
+          setStatus('err', 'Unexpected error while submitting. Please try again.');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Submit Booking Request';
+        }
+      });
+    })();
+
+    // Footer year (if present)
+    (function(){
+      const y = document.getElementById('year');
+      if (y) y.textContent = String(new Date().getFullYear());
+    })();
+  </script>
+</body>
+</html>
