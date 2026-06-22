@@ -107,7 +107,8 @@
     .wave{height:54px;border-radius:16px;overflow:hidden;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.10)}
     .wave-canvas{width:100%;height:100%;display:block}
 
-    .time-row{display:flex;justify-content:space-between;gap:10px;color:rgba(245,245,245,.66);font-size:12px;letter-spacing:.02em}
+    .time-row{display:flex;justify-content:flex-end;gap:10px;color:rgba(245,245,245,.66);font-size:12px;letter-spacing:.02em}
+    .time-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-variant-numeric: tabular-nums;}
     .bar{height:12px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);position:relative;overflow:hidden;cursor:pointer}
     .fill{position:absolute;inset:0 auto 0 0;width:0%;background:linear-gradient(90deg, rgba(139,92,246,1), rgba(236,72,153,1));box-shadow:0 0 24px rgba(139,92,246,.35),0 0 24px rgba(236,72,153,.22)}
     .knob{position:absolute;top:50%;left:0%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:999px;background:rgba(255,255,255,.92);
@@ -317,8 +318,7 @@
                 <canvas id="waveCanvas" class="wave-canvas" width="1200" height="140"></canvas>
               </div>
               <div class="time-row">
-                <span id="curTime">0:00</span>
-                <span id="durTime">0:00</span>
+                <span class="time-mono" id="timeMono">0:00 / 0:00</span>
               </div>
               <div class="bar" id="bar" role="slider" aria-label="Progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
                 <div class="fill" id="fill"></div>
@@ -492,14 +492,13 @@
       const nextBtn = document.getElementById('nextBtn');
       const vol = document.getElementById('vol');
       const trackTitle = document.getElementById('trackTitle');
-      const curTime = document.getElementById('curTime');
-      const durTime = document.getElementById('durTime');
+      const timeMono = document.getElementById('timeMono');
       const bar = document.getElementById('bar');
       const fill = document.getElementById('fill');
       const knob = document.getElementById('knob');
       const playlistEl = document.getElementById('playlist');
       const trackCount = document.getElementById('trackCount');
-      if (!audio || !playBtn || !prevBtn || !nextBtn || !vol || !trackTitle || !curTime || !durTime || !bar || !fill || !knob || !playlistEl || !trackCount) return;
+      if (!audio || !playBtn || !prevBtn || !nextBtn || !vol || !trackTitle || !timeMono || !bar || !fill || !knob || !playlistEl || !trackCount) return;
 
       let idx = 0;
       let isScrubbing = false;
@@ -531,11 +530,36 @@
         });
       };
 
-      const selectTrack = (newIdx, autoplay) => {
+      let fadeToken = 0;
+      const FADE_MS = 500;
+
+      const fadeVolumeTo = (from, to, ms, token) => new Promise((resolve) => {
+        const start = performance.now();
+        const tick = (now) => {
+          if (token !== fadeToken) return resolve(false);
+          const t = Math.min(1, (now - start) / ms);
+          const v = from + (to - from) * t;
+          audio.volume = clamp(v, 0, 1);
+          if (t < 1) requestAnimationFrame(tick);
+          else resolve(true);
+        };
+        requestAnimationFrame(tick);
+      });
+
+      const selectTrack = async (newIdx, autoplay) => {
+        const token = ++fadeToken;
+        const targetVolume = clamp(desiredVolume, 0, 1);
+        const wasPlaying = !audio.paused;
+
+        // Crossfade only when switching while something is (or was) playing.
+        if (wasPlaying) {
+          await fadeVolumeTo(audio.volume, 0, FADE_MS, token);
+        }
+
         idx = (newIdx + tracks.length) % tracks.length;
         const t = tracks[idx];
 
-        // Force the new source to commit reliably.
+        // Switch source at 0 volume.
         audio.pause();
         trackTitle.textContent = t.title;
         audio.setAttribute('src', t.url);
@@ -544,10 +568,16 @@
 
         highlightPlaylist();
         setProgress(0);
-        curTime.textContent = '0:00';
-        durTime.textContent = '0:00';
+        timeMono.textContent = '0:00 / 0:00';
 
-        if (autoplay) audio.play().catch(() => {});
+        // Restore volume and fade in if needed.
+        audio.volume = 0;
+        if (autoplay || wasPlaying) {
+          await audio.play().catch(() => {});
+          await fadeVolumeTo(0, targetVolume, FADE_MS, token);
+        } else {
+          audio.volume = targetVolume;
+        }
       };
 
       const togglePlay = () => {
@@ -623,18 +653,32 @@
         });
       };
 
+      let desiredVolume = clamp(Number(vol.value), 0, 1);
+
       // Wire controls
       playBtn.addEventListener('click', togglePlay);
       prevBtn.addEventListener('click', () => selectTrack(idx - 1, true));
       nextBtn.addEventListener('click', () => selectTrack(idx + 1, true));
-      vol.addEventListener('input', () => { audio.volume = Number(vol.value); });
+      vol.addEventListener('input', () => {
+        desiredVolume = clamp(Number(vol.value), 0, 1);
+        // If we aren't currently mid-fade, apply immediately.
+        if (audio.volume > 0.001 || audio.paused) {
+          audio.volume = desiredVolume;
+        }
+      });
 
       audio.addEventListener('play', () => setPlayIcon(true));
       audio.addEventListener('pause', () => setPlayIcon(false));
-      audio.addEventListener('loadedmetadata', () => { durTime.textContent = fmt(audio.duration); });
+      audio.addEventListener('loadedmetadata', () => {
+        const total = fmt(audio.duration);
+        const elapsed = fmt(audio.currentTime);
+        timeMono.textContent = `${elapsed} / ${total}`;
+      });
       audio.addEventListener('timeupdate', () => {
         if (isScrubbing) return;
-        curTime.textContent = fmt(audio.currentTime);
+        const total = fmt(audio.duration);
+        const elapsed = fmt(audio.currentTime);
+        timeMono.textContent = `${elapsed} / ${total}`;
         if (isFinite(audio.duration) && audio.duration > 0) setProgress(audio.currentTime / audio.duration);
       });
 
@@ -664,13 +708,9 @@
         if (audio.currentTime >= audio.duration - 0.15) advanceNext();
       });
 
-      // Waveform visualization (Web Audio API)
+      // Waveform visualization (visual-only; does not affect audio playback)
       const waveCanvas = document.getElementById('waveCanvas');
       const waveCtx = waveCanvas ? waveCanvas.getContext('2d') : null;
-      let audioCtx = null;
-      let analyser = null;
-      let srcNode = null;
-      let freqData = null;
       let waveRAF = null;
 
       const resizeWave = () => {
@@ -684,23 +724,14 @@
         if (waveCanvas.height !== h) waveCanvas.height = h;
       };
 
+      // NOTE: In some sandboxed previews, routing <audio> through Web Audio via
+      // createMediaElementSource() can cause silent playback. To keep sound reliable,
+      // we render a visual-only equalizer without touching the audio output path.
       const ensureAudioGraph = async () => {
         if (!waveCanvas || !waveCtx) return;
-        if (!audioCtx) {
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          analyser = audioCtx.createAnalyser();
-          analyser.fftSize = 256;
-          analyser.smoothingTimeConstant = 0.85;
-          freqData = new Uint8Array(analyser.frequencyBinCount);
-          srcNode = audioCtx.createMediaElementSource(audio);
-          srcNode.connect(analyser);
-          analyser.connect(audioCtx.destination);
-          resizeWave();
-          window.addEventListener('resize', resizeWave);
-        }
-        if (audioCtx.state === 'suspended') {
-          try { await audioCtx.resume(); } catch (_) {}
-        }
+        // No audio graph creation on purpose (sound remains native <audio> playback).
+        resizeWave();
+        window.addEventListener('resize', resizeWave);
       };
 
       const clearWave = () => {
@@ -708,10 +739,10 @@
         waveCtx.clearRect(0, 0, waveCanvas.width, waveCanvas.height);
       };
 
+      // Visual-only equalizer (no audio routing)
+      let smooth = new Array(56).fill(0);
       const drawWave = () => {
-        if (!waveCtx || !waveCanvas || !analyser || !freqData) return;
-
-        analyser.getByteFrequencyData(freqData);
+        if (!waveCtx || !waveCanvas) return;
 
         const w = waveCanvas.width;
         const h = waveCanvas.height;
@@ -725,27 +756,32 @@
         grad.addColorStop(0, 'rgba(139,92,246,0.95)');
         grad.addColorStop(1, 'rgba(236,72,153,0.90)');
 
-        const bins = freqData.length;
-        const bars = 56; // fixed bar count for clean UI
-        const step = Math.max(1, Math.floor(bins / bars));
+        const bars = smooth.length;
         const gap = Math.max(2, Math.floor(w / (bars * 14)));
         const barW = Math.max(4, Math.floor((w - gap * (bars - 1)) / bars));
 
         // Soft shadow
         waveCtx.shadowColor = 'rgba(139,92,246,0.20)';
         waveCtx.shadowBlur = Math.max(8, Math.floor(w / 120));
-
         waveCtx.fillStyle = grad;
 
+        // Drive motion from time + randomness; calmer when paused
+        const t = audio && isFinite(audio.currentTime) ? audio.currentTime : 0;
+        const playing = audio && !audio.paused;
+        const base = playing ? 0.22 : 0.06;
+        const wobble = playing ? 0.20 : 0.03;
+
         for (let i = 0; i < bars; i++) {
-          const v = freqData[i * step] / 255; // 0..1
-          const eased = Math.pow(v, 0.85);
-          const barH = Math.max(4, eased * (h * 0.92));
+          const phase = (i / bars) * 6.0;
+          const target = base + wobble * (0.5 + 0.5 * Math.sin(t * 3.2 + phase)) + (playing ? (Math.random() * 0.10) : 0);
+          smooth[i] = smooth[i] * 0.82 + target * 0.18;
+
+          const v = Math.max(0, Math.min(1, smooth[i]));
+          const barH = Math.max(4, v * (h * 0.95));
           const x = i * (barW + gap);
           const y = h - barH;
           const r = Math.min(10, Math.floor(barW / 2));
 
-          // Rounded rect
           waveCtx.beginPath();
           waveCtx.moveTo(x + r, y);
           waveCtx.lineTo(x + barW - r, y);
@@ -760,7 +796,6 @@
           waveCtx.fill();
         }
 
-        // Continue while playing
         waveRAF = requestAnimationFrame(drawWave);
       };
 
@@ -875,7 +910,7 @@
       });
 
       // Init
-      audio.volume = Number(vol.value);
+      audio.volume = desiredVolume;
       renderPlaylist();
       bindScrub();
       selectTrack(0, false);
